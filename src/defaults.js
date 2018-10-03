@@ -52,7 +52,7 @@ export default {
 	/**
 	 * The width (thickness) of the line between label and chart arc.
 	 * @member {Number|Array|Function}
-	 * @default 2 
+	 * @default 2
 	 */
 	lineWidth: 2,
 
@@ -150,11 +150,18 @@ export default {
 	 * @default 1
 	 */
 	percentPrecision: 1,
-	
+
 	/**
 	 * The count of numbers after the point separator for float values of value property
 	 * @member {Number}
 	 * @default 3
 	 */
-	valuePrecision: 3
+	valuePrecision: 3,
+
+	/**
+	 * Whether to use compact style - with dots and bottom border only
+	 * @member {Boolean}
+	 * @default false
+	 */
+	compactStyle: false
 };

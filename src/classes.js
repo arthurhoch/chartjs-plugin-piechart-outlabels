@@ -80,17 +80,28 @@ export default {
 				color: resolve([config.color, 'white'], context, index),
 				font: helpers.parseFont(resolve([config.font, {resizable: true}]), ctx.canvas.style.height.slice(0, -2)),
 				padding: helpers.options.toPadding(resolve([config.padding, 0], context, index)),
-				textAlign: resolve([config.textAlign, 'left'], context, index),
+				textAlign: resolve([config.textAlign, 'left'], context, index)
 			};
 
+			this.compactStyle = resolve([config.compactStyle, defaults.compactStyle, false], context, index);
 			this.stretch = resolve([config.stretch, 40], context, index);
 			this.size = helpers.textSize(ctx, this.lines, this.style.font);
 
 			this.offsetStep = this.size.width / 20;
-			this.offset = {
-				x: 0,
-				y: 0
-			};
+
+			if (this.compactStyle) {
+				this.offset = {
+					x: this.size.width / 2,
+					y: -this.size.height / 2 - this.style.padding.bottom - this.style.borderWidth
+				};
+			}
+			else {
+				this.offset = {
+					x: 0,
+					y: 0
+				};
+			}
+
 			this.predictedOffset = this.offset;
 
 			var angle = -((el._model.startAngle + el._model.endAngle) / 2) / (Math.PI);
@@ -98,10 +109,22 @@ export default {
 
 			if (val > 0.45 && val < 0.55) {
 				this.predictedOffset.x = 0;
+
+				if (this.compactStyle) {
+					this.predictedOffset.x = this.size.width / 2 + this.style.padding.left + this.style.borderWidth;
+				}
 			} else if (angle <= 0.45 && angle >= -0.45) {
 				this.predictedOffset.x = this.size.width / 2;
+
+				if (this.compactStyle) {
+					this.predictedOffset.x += this.style.padding.left + this.style.borderWidth;
+				}
 			} else if (angle >= -1.45 && angle <= -0.55) {
 				this.predictedOffset.x = -this.size.width / 2;
+
+				if (this.compactStyle) {
+					this.predictedOffset.x -= (this.style.padding.left + this.style.borderWidth);
+				}
 			}
 		};
 
@@ -210,14 +233,24 @@ export default {
 		// Draw label box
 		this.drawLabel = function() {
 			ctx.beginPath();
-			helpers.canvas.roundedRect(
-				this.ctx,
-				Math.round(this.labelRect.x),
-				Math.round(this.labelRect.y),
-				Math.round(this.labelRect.width),
-				Math.round(this.labelRect.height),
-				this.style.borderRadius
-			);
+
+			if (this.compactStyle) {
+				var x = Math.round(this.labelRect.x);
+				var y = Math.round(this.labelRect.y) + Math.round(this.labelRect.height);
+				this.ctx.moveTo(x, y);
+				this.ctx.lineTo(x + Math.round(this.labelRect.width), y);
+			}
+			else {
+				helpers.canvas.roundedRect(
+					this.ctx,
+					Math.round(this.labelRect.x),
+					Math.round(this.labelRect.y),
+					Math.round(this.labelRect.width),
+					Math.round(this.labelRect.height),
+					this.style.borderRadius
+				);
+			}
+
 			this.ctx.closePath();
 
 			if (this.style.backgroundColor) {
@@ -235,16 +268,28 @@ export default {
 
 
 		this.drawLine = function() {
-			this.ctx.save();
+			var dotSize = 3;
 
+			this.ctx.save();
 			this.ctx.strokeStyle = this.style.lineColor;
+			this.ctx.fillStyle = this.style.lineColor;
 			this.ctx.lineWidth = this.style.lineWidth;
 			this.ctx.lineJoin = 'miter';
+
+			if (this.compactStyle) {
+				this.ctx.beginPath();
+				this.ctx.arc(this.center.anchor.x, this.center.anchor.y, dotSize, 0, 2 * Math.PI);
+				this.ctx.stroke();
+				this.ctx.fill();
+				this.ctx.closePath();
+			}
+
 			this.ctx.beginPath();
 			this.ctx.moveTo(this.center.anchor.x, this.center.anchor.y);
+
 			this.ctx.lineTo(this.center.copy.x, this.center.copy.y);
 			this.ctx.stroke();
-
+			this.ctx.closePath();
 			this.ctx.restore();
 		};
 
@@ -255,7 +300,7 @@ export default {
 
 
 		this.update = function(view, elements, max) {
-			this.center = positioners.center(view, this.stretch);
+			this.center = positioners.center(view, this.stretch, this.compactStyle);
 			this.moveLabelToOffset();
 
 			this.center.x += this.offset.x;
