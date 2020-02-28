@@ -149,7 +149,7 @@ export default {
 	 * @member {Number}
 	 * @default 1
 	 */
-	percentPrecision: 1,
+	percentPrecision: 2,
 
 	/**
 	 * The count of numbers after the point separator for float values of value property
