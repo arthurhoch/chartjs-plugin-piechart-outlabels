@@ -7,7 +7,7 @@
   "main": "dist/chartjs-plugin-piechart-outlabels.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/groinder/chartjs-plugin-piechart-outlabels"
+    "url": "https://github.com/arthurhoch/chartjs-plugin-piechart-outlabels"
   },
   "devDependencies": {
     "gitbook-cli": "^2.3.2",
